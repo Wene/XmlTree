@@ -13,15 +13,17 @@ class Form(QWidget):
         lay_buttons = QHBoxLayout()
         lay_main.addLayout(lay_buttons)
         self.btn_open = QPushButton("&Open")
-        self.btn_open.clicked.connect(self.fill_tree)   # dummy action for test
+        self.btn_open.clicked.connect(self.open_file)
         self.btn_close = QPushButton("&Close")
         self.btn_close.clicked.connect(self.close)
         lay_buttons.addWidget(self.btn_open)
         lay_buttons.addWidget(self.btn_close)
 
+    # TODO: Method for demo purposes only. Remove in productive version.
     def fill_tree(self):
         self.tree.clear()
         self.tree.setColumnCount(2)
+        self.tree.setHeaderLabels(["Hallo", "Welt"])
         item = QTreeWidgetItem(["Eintrag 1", "Spalte 2"])
         self.tree.addTopLevelItem(item)
         subitem = QTreeWidgetItem(["Eintrag 2", "bla"])
@@ -29,6 +31,14 @@ class Form(QWidget):
         item.setExpanded(True)
         self.tree.resizeColumnToContents(0)
 
+    def open_file(self):
+        filename, _ = QFileDialog.getOpenFileName(self, "Open XML File")
+        if filename:                            # False if empty string -> no file selected, nothing to do.
+            xml_file = QFile(filename)
+            xml_file.open(QIODevice.ReadOnly)
+            content = xml_file.readAll()
+            xml_file.close()
+            print(content)
 
 
 if __name__ == '__main__':
