@@ -20,11 +20,16 @@ class Form(QWidget):
         lay_buttons.addWidget(self.btn_close)
 
     def fill_tree(self):
+        self.tree.clear()
         self.tree.setColumnCount(2)
         item = QTreeWidgetItem(["Eintrag 1", "Spalte 2"])
         self.tree.addTopLevelItem(item)
         subitem = QTreeWidgetItem(["Eintrag 2", "bla"])
         item.addChild(subitem)
+        item.setExpanded(True)
+        self.tree.resizeColumnToContents(0)
+
+
 
 if __name__ == '__main__':
     import sys
