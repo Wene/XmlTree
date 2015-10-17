@@ -57,12 +57,18 @@ class Form(QWidget):
                 if xml_reader.isStartElement():
                     item = self.read_xml_to_item(xml_reader)
                     self.tree.addTopLevelItem(item)
-                    item.setExpanded(True)          # TODO: call recursively
+                    self.expand_recursively(item)
 
             xml_reader.clear()
             xml_file.close()
             for i in range(3):
                 self.tree.resizeColumnToContents(i)
+
+    def expand_recursively(self, item):
+        assert isinstance(item, QTreeWidgetItem)
+        item.setExpanded(True)
+        for i in range(item.childCount()):
+            self.expand_recursively(item.child(i))
 
     def read_xml_to_item(self, xml_reader):
         assert isinstance(xml_reader, QXmlStreamReader)
@@ -74,16 +80,16 @@ class Form(QWidget):
         # TODO: convert attributes into attribute_text
         attribute_text = ""
 
+        xml_reader.readNext()
         text = ""
         # loop til end of this element
         while not xml_reader.isEndElement():
-            xml_reader.readNext()
             if xml_reader.isCharacters():
                 text = xml_reader.text()
             elif xml_reader.isStartElement():   # recursively scan start elements
                 sub_item = self.read_xml_to_item(xml_reader)
                 item.addChild(sub_item)
-                xml_reader.readNext()           # necessary to avoid isEndElement detection of the sub element
+            xml_reader.readNext()
 
         item.setText(0, name)
         item.setText(1, attribute_text)
