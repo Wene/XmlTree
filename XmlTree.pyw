@@ -70,24 +70,34 @@ class Form(QWidget):
         for i in range(item.childCount()):
             self.expand_recursively(item.child(i))
 
+    # read the XML structure and return QTreeWidgetItem
     def read_xml_to_item(self, xml_reader):
         assert isinstance(xml_reader, QXmlStreamReader)
         item = QTreeWidgetItem()
 
+        # get name and attributes from current element
         name = xml_reader.name()
         attributes = xml_reader.attributes()
-        assert isinstance(attributes, QXmlStreamAttributes)
-        # TODO: convert attributes into attribute_text
         attribute_text = ""
+        assert isinstance(attributes, QXmlStreamAttributes)
 
+        # convert attributes into text
+        count = attributes.count()
+        for i in range(count):
+            attr = attributes.at(i)
+            assert isinstance(attr, QXmlStreamAttribute)
+            attribute_text += attr.name() + "=" + attr.value()
+            if i < count - 1:
+                attribute_text += "; "
+
+        # read next element - may be a text, end or start element.
         xml_reader.readNext()
         text = ""
-        # loop til end of this element
-        while not xml_reader.isEndElement():
-            if xml_reader.isCharacters():
+        while not xml_reader.isEndElement():    # loop til end of this element
+            if xml_reader.isCharacters():       # if it is text, it belongs to this element
                 text = xml_reader.text()
-            elif xml_reader.isStartElement():   # recursively scan start elements
-                sub_item = self.read_xml_to_item(xml_reader)
+            elif xml_reader.isStartElement():   # a start element at this point must be a sub element.
+                sub_item = self.read_xml_to_item(xml_reader)    # scan elements recursively
                 item.addChild(sub_item)
             xml_reader.readNext()
 
