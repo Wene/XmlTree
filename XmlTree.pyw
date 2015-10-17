@@ -29,18 +29,6 @@ class Form(QWidget):
         self.settings.setValue("Position", self.pos())
         self.settings.setValue("Size", self.size())
 
-    # TODO: Method for demo purposes only. Remove in productive version.
-    def fill_tree(self):
-        self.tree.clear()
-        self.tree.setColumnCount(2)
-        self.tree.setHeaderLabels(["Hallo", "Welt"])
-        item = QTreeWidgetItem(["Eintrag 1", "Spalte 2"])
-        self.tree.addTopLevelItem(item)
-        subitem = QTreeWidgetItem(["Eintrag 2", "bla"])
-        item.addChild(subitem)
-        item.setExpanded(True)
-        self.tree.resizeColumnToContents(0)
-
     def open_file(self):
         filename, _ = QFileDialog.getOpenFileName(self, "Open XML File")
         if filename:                            # False if empty string -> no file selected, nothing to do.
