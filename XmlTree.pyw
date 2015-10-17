@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+# Copyright 2015, Werner Meier <wene83@gmx.ch>
+# licensed under the terms of the GPL, see separate LICENSE file
+
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
