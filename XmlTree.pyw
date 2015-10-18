@@ -10,8 +10,6 @@ from PyQt5.QtWidgets import *
 class Form(QWidget):
     def __init__(self, parent=None):
         super(Form, self).__init__(parent)
-        self.setWindowTitle("XmlTree v0.1")
-
         lay_main = QVBoxLayout(self)
         self.tree = QTreeWidget()
         self.tree.setHeaderHidden(True)
@@ -19,37 +17,44 @@ class Form(QWidget):
         lay_buttons = QHBoxLayout()
         lay_main.addLayout(lay_buttons)
         self.btn_open = QPushButton("Ö&ffnen")
-        self.btn_open.clicked.connect(self.open_file)
+        self.btn_open.clicked.connect(self.open_file_dialog)
         self.btn_close = QPushButton("&Schliessen")
         self.btn_close.clicked.connect(self.close)
         lay_buttons.addWidget(self.btn_open)
         lay_buttons.addWidget(self.btn_close)
 
         # restore settings
-        self.settings = QSettings("Wene", "XmlTree")
+        self.settings = QSettings()
         self.move(self.settings.value("Position", QPoint(50, 50)))
         self.resize(self.settings.value("Size", QSize(300, 300)))
+
+        if len(app.arguments()) > 1:
+            filename = app.arguments()[1]
+            self.open_file(filename)
 
     def closeEvent(self, QCloseEvent):
         # save settings on closing
         self.settings.setValue("Position", self.pos())
         self.settings.setValue("Size", self.size())
 
-    def open_file(self):
+    def open_file_dialog(self):
         last_filename = self.settings.value("Filename", ".")
         filename, _ = QFileDialog.getOpenFileName(self, "XML Datei öffnen", last_filename,
                                                   "XML Dateien (*.xml);;Alle Dateien (*)")
         if filename:                            # False if empty string -> no file selected, nothing to do.
+            self.open_file(filename)
+
+    def open_file(self, filename):
+        xml_file = QFile(filename)
+        if xml_file.exists():
+            xml_file.open(QIODevice.ReadOnly)
+
             self.tree.clear()
             self.tree.setColumnCount(3)
             self.tree.setHeaderHidden(False)
             self.tree.setHeaderLabels(["Name", "Attribute", "Inhalt"])
-
-            xml_file = QFile(filename)
-            xml_file.open(QIODevice.ReadOnly)
             self.settings.setValue("Filename", filename)    # save filename in settings for next use
             xml_reader = QXmlStreamReader(xml_file)
-
             while not xml_reader.atEnd():
                 xml_reader.readNext()
                 if xml_reader.isStartElement():
@@ -62,6 +67,8 @@ class Form(QWidget):
             xml_file.close()
             for i in range(3):
                 self.tree.resizeColumnToContents(i)
+        else:
+            QMessageBox.warning(self, "Datei nicht gefunden", "Die Datei \"" + filename + "\" existiert nicht.")
 
     def expand_recursively(self, item):
         assert isinstance(item, QTreeWidgetItem)
@@ -110,6 +117,9 @@ if __name__ == '__main__':
     import sys
 
     app = QApplication(sys.argv)
+    app.setOrganizationName("Wene")
+    app.setApplicationName("XmlTree")
+    app.setApplicationVersion("0.2")
 
     translator = QTranslator()
     lib_path = QLibraryInfo.location(QLibraryInfo.TranslationsPath)
