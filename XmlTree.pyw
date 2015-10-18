@@ -39,7 +39,7 @@ class Form(QWidget):
 
     def open_file_dialog(self):
         last_filename = self.settings.value("Filename", ".")
-        filename, _ = QFileDialog.getOpenFileName(self, "XML Datei öffnen", last_filename,
+        filename, selected_filter = QFileDialog.getOpenFileName(self, "XML Datei öffnen", last_filename,
                                                   "XML Dateien (*.xml);;Alle Dateien (*)")
         if filename:                            # False if empty string -> no file selected, nothing to do.
             self.open_file(filename)
