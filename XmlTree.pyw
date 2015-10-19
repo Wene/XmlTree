@@ -61,12 +61,18 @@ class Form(QWidget):
                     item = self.read_xml_to_item(xml_reader)
                     self.tree.addTopLevelItem(item)
                     self.expand_recursively(item)
-            # TODO: error handling
+            if xml_reader.hasError():
+                QMessageBox.information(self, "XML Fehler aufgetreten", xml_reader.errorString())
 
             xml_reader.clear()
             xml_file.close()
             for i in range(3):
                 self.tree.resizeColumnToContents(i)
+
+            # Need the QFileInfo class to strip the path from the filename.
+            file_info = QFileInfo(xml_file)
+            self.setWindowTitle(app.applicationName() + " v" +
+                                app.applicationVersion() + " [" + file_info.fileName() + "]")
         else:
             QMessageBox.warning(self, "Datei nicht gefunden", "Die Datei \"" + filename + "\" existiert nicht.")
 
@@ -99,9 +105,9 @@ class Form(QWidget):
         # read next element - may be a text, end or start element.
         xml_reader.readNext()
         text = ""
-        while not xml_reader.isEndElement():    # loop til end of this element
+        while not xml_reader.isEndElement() and not xml_reader.hasError():    # loop til end of this element
             if xml_reader.isCharacters():       # if it is text, it belongs to this element
-                text = xml_reader.text()
+                text += xml_reader.text()       # concatenate multiple text elements
             elif xml_reader.isStartElement():   # a start element at this point must be a sub element.
                 sub_item = self.read_xml_to_item(xml_reader)    # scan elements recursively
                 item.addChild(sub_item)
