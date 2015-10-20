@@ -11,6 +11,8 @@ class Form(QWidget):
     def __init__(self, parent=None):
         super(Form, self).__init__(parent)
         lay_main = QVBoxLayout(self)
+        self.lbl_docinfo = QLabel("Kein Dokument geladen")
+        lay_main.addWidget(self.lbl_docinfo)
         self.tree = QTreeWidget()
         self.tree.setHeaderHidden(True)
         lay_main.addWidget(self.tree)
@@ -52,7 +54,7 @@ class Form(QWidget):
             self.tree.clear()
             self.tree.setColumnCount(3)
             self.tree.setHeaderHidden(False)
-            self.tree.setHeaderLabels(["Name", "Attribute", "Inhalt"])
+            self.tree.setHeaderLabels(["Name", "Attribute", "Text"])
             self.settings.setValue("Filename", filename)    # save filename in settings for next use
             xml_reader = QXmlStreamReader(xml_file)
             while not xml_reader.atEnd():
@@ -61,6 +63,10 @@ class Form(QWidget):
                     item = self.read_xml_to_item(xml_reader)
                     self.tree.addTopLevelItem(item)
                     self.expand_recursively(item)
+                    continue
+                if xml_reader.isStartDocument():
+                    label = "Version: " + xml_reader.documentVersion() + " / Encoding: " + xml_reader.documentEncoding()
+                    self.lbl_docinfo.setText(label)
             if xml_reader.hasError():
                 QMessageBox.information(self, "XML Fehler aufgetreten", xml_reader.errorString())
 
